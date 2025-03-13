@@ -11,10 +11,12 @@ from utils.metrics import evaluate, EarlyStopping
 def train(epochs):
     train_dir, val_dir, test_dir = data_ready()
     train_loader, val_loader, test_loader, class_names = data_loader_set(train_dir, val_dir, test_dir)
+ 
 
     model = prep_finetune_GoogLeNet(class_names)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print("Device: ", device)
 
     model = model.to(device)
 
@@ -28,7 +30,7 @@ def train(epochs):
 )
 
     early_stopping = EarlyStopping(patience=6, verbose=True)
-
+    print("start training")
     for epoch in range(epochs):
         model.train()
 
@@ -59,9 +61,7 @@ def train(epochs):
 
 
         eval_loss, eval_acc, eval_precision, eval_recall, eval_f1 = evaluate(model, val_loader, criterion, device)
-
-        model.eval()
-
+        print(f"scheduler step: {eval_loss}")
         scheduler.step(eval_loss)
 
         model.train()
